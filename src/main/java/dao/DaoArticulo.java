@@ -4,10 +4,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import pojos.Articulo;
+import pojos.Departamento;
+import pojos.Usuario;
 import excepciones.BusinessException;
 import jdbc.ConexionJdbc;
 
@@ -183,27 +187,143 @@ public class DaoArticulo extends DaoGenerico<Articulo, Integer> {
 		}
 	}
 
+	// Ejercicio D1
+	public List<Articulo> filtrarPorDepartamentoUsuario(Departamento departamento, Usuario usuario)
+			throws BusinessException {
+
+		List<Articulo> result = new ArrayList<Articulo>();
+		Connection con = ConexionJdbc.getConnection();
+		PreparedStatement pstm = null;
+		ResultSet rs = null;
+
+		try {
+
+			String sql = "SELECT a.idarticulo, a.numserie, a.estado FROM Articulo a WHERE 1=1";
+
+			if (departamento.getIddepartamento() != null) {
+				sql += " AND a.departamento=?";
+			}
+
+			if (usuario.getIdUsuario() != null) {
+				sql += " AND a.usuarioalta=?";
+			}
+
+			pstm = con.prepareStatement(sql);
+
+			int index = 1;
+
+			if (departamento.getIddepartamento() != null) {
+				pstm.setInt(index++, departamento.getIddepartamento());
+			}
+
+			if (usuario.getIdUsuario() != null) {
+				pstm.setInt(index++, usuario.getIdUsuario());
+			}
+
+			rs = pstm.executeQuery();
+
+			while (rs.next()) {
+
+				Articulo articulo = new Articulo();
+
+				articulo.setIdArticulo(rs.getInt("idarticulo"));
+				articulo.setNumserie(rs.getString("numserie"));
+				articulo.setEstado(rs.getString("estado"));
+
+				result.add(articulo);
+			}
+
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new BusinessException("Error al consultar");
+
+		} finally {
+			ConexionJdbc.cerrar(pstm);
+		}
+	}
+
+	// Ejercicio D2
+	public List<Object> filtarPorDepartamentoFechaAlta(Departamento departamento, LocalDateTime fechaAlta)
+			throws BusinessException {
+		
+		List<Object> result = new ArrayList<Object>();
+		Connection con = ConexionJdbc.getConnection();
+		PreparedStatement pstm = null;
+		ResultSet rs = null;
+		
+		try {
+			
+			String sql = "SELECT a.idarticulo, a.numserie, m.descripcion FROM Articulo a "
+					+ "JOIN Modeloarticulo m ON a.modelo = m.idmodeloarticulo WHERE 1=1 ";
+			
+			if (departamento.getIddepartamento() != null) {
+				sql += " AND a.departamento=?";
+			}
+			
+			if(fechaAlta != null) {
+				sql += " AND fechaalta > ?";
+			}
+			
+			pstm = con.prepareStatement(sql);
+
+			int index = 1;
+			
+			if (departamento.getIddepartamento() != null) {
+				pstm.setInt(index++, departamento.getIddepartamento());
+			}
+			
+			if(fechaAlta != null) {
+				pstm.setTimestamp(index++, Timestamp.valueOf(fechaAlta));
+			}
+			
+			rs = pstm.executeQuery();
+			
+			while (rs.next()) {
+				
+				Articulo articulo = new Articulo();
+				
+				articulo.setIdArticulo(rs.getInt("idarticulo"));
+				articulo.setNumserie(rs.getString("numserie"));
+				
+				String descripcion = rs.getString("descripcion");
+				
+				result.add(articulo);
+				result.add(descripcion);
+			}
+			
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new BusinessException("Error al consultar");
+
+		} finally {
+			ConexionJdbc.cerrar(pstm);
+		}
+	}
 	public void bajaMasivaCustom() throws BusinessException {
 
-	    Connection con = ConexionJdbc.getConnection();
-	    PreparedStatement pstm = null;
+		Connection con = ConexionJdbc.getConnection();
+		PreparedStatement pstm = null;
 
-	    try {
+		try {
 
-	        String sql = "UPDATE articulo SET estado = ? WHERE fechabaja IS NOT NULL";
-	        pstm = con.prepareStatement(sql);
+			String sql = "UPDATE articulo SET estado = ? WHERE fechabaja IS NOT NULL";
+			pstm = con.prepareStatement(sql);
 
-	        pstm.setString(1, "retirado");
+			pstm.setString(1, "retirado");
 
-	        pstm.executeUpdate();
+			pstm.executeUpdate();
 
-	    } catch (SQLException e) {
-	        throw new BusinessException("Error en la actualización masiva");
-	    } finally {
-	        ConexionJdbc.cerrar(pstm);
-	    }
+		} catch (SQLException e) {
+			throw new BusinessException("Error en la actualización masiva");
+		} finally {
+			ConexionJdbc.cerrar(pstm);
+		}
 	}
-	
+
 	private Integer generarNuevoId() throws BusinessException {
 		Connection con = ConexionJdbc.getConnection();
 		PreparedStatement pstm = null;

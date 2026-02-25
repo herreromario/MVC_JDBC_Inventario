@@ -1,18 +1,14 @@
 package interfaz;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Scanner;
 
 import dao.DaoArticulo;
 import dao.DaoDepartamento;
-import dao.DaoUsuario;
 import excepciones.BusinessException;
 import jdbc.ConexionJdbc;
 import pojos.Articulo;
 import pojos.Departamento;
-import pojos.Usuario;
 
 /*
  * 	Operaciones de mantenimiento sobre la tabla de artículos:
@@ -67,6 +63,8 @@ public class Ejercicio_B1_Insertar_Articulo {
 			daoArticulo.grabarCustom(articulo);
 
 			System.out.println("Artículo insertado correctamente");
+
+			sc.close();
 
 		} catch (BusinessException e) {
 			e.printStackTrace();

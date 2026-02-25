@@ -46,6 +46,8 @@ public class Ejercicio_B2_Actualizar_Articulo {
 			
 			System.out.println("Articulo actualizado correctamente.");
 			
+			sc.close();
+			
 		} catch (BusinessException e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());

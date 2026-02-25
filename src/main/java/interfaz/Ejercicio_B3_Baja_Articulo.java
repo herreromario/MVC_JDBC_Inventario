@@ -47,6 +47,8 @@ public class Ejercicio_B3_Baja_Articulo {
 			
 			System.out.println("Articulo dado de baja correctamente.");
 			
+			sc.close();
+			
 		} catch (BusinessException e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());
